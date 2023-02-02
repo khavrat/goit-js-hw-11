@@ -1,35 +1,68 @@
-import { PhotoApi } from './js/photoapi.js';
-import { LoadBtn } from './js/loadbtn.js';
+import { ImgApi } from './js/photoapi.js';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const form = document.querySelector('#search-form');
 const gallery = document.querySelector('.gallery');
-const loadMoreBtn = new LoadBtn('.load-more');
-loadMoreBtn.show();
+const loadMoreBtn = document.querySelector('.load-more');
 
-const photoApi = new PhotoApi();
+form.addEventListener('submit', fetchImgBySubmit);
+loadMoreBtn.addEventListener('click', fetchImgList);
 
-form.addEventListener('submit', fetchPhotoBySubmit);
-loadMoreBtn.button.addEventListener('click', fetchPhotoList);
+loadMoreBtn.classList.add('hidden');
 
-function fetchPhotoBySubmit(e) {
+const imgApi = new ImgApi();
+const lightbox = new SimpleLightbox('.gallery-item');
+
+
+function fetchImgBySubmit(e) {
   e.preventDefault();
 
-  console.log(photoApi);
-  cleanPhotoList();
-  photoApi.resetPage();
+  cleanImgList();
+  imgApi.resetPage();
 
   const form = e.currentTarget;
-  photoApi.queryValue = form.elements.searchQuery.value.trim();
-  console.log(photoApi.queryValue);
+  imgApi.queryValue = form.elements.searchQuery.value.trim();
 
-  fetchPhotoList()
+  fetchImgList()
     .catch(onError)
     .finally(() => form.reset());
 }
 
+function fetchImgList() {
+  return imgApi
+    .fetchImg()
+    .then(({ hits }) => {
+      console.log(hits);
+      return hits.reduce((markup, img) => createMarkup(img) + markup, '');
+    })
+    .then(updateImgList);
+}
+
+function onError(error) {
+  if (error.message === 'empty request') {
+    Notify.failure('Empty request. Enter a word to search for an image');
+    console.log(error.message);
+  } else if (error.message === 'nothing found') {
+    Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again'
+    );
+    console.log(error.message);
+  }
+}
+
 function createMarkup(hits) {
-  const { webformatURL, tags, likes, views, comments, downloads } = hits;
-  return `<div class="photo-card">
+  const {
+    largeImageURL,
+    webformatURL,
+    tags,
+    likes,
+    views,
+    comments,
+    downloads,
+  } = hits;
+  return ` <a class="gallery-item" href="${largeImageURL}"><div class="img-card">
       <img src="${webformatURL}" alt="${tags}" loading="lazy" />
       <div class="info">
         <p class="info-item">
@@ -45,41 +78,29 @@ function createMarkup(hits) {
           <b>Downloads ${downloads}</b>
         </p>
       </div>
-    </div>
+    </div></a>
 `;
 }
 
-function updatePhotoList(markup) {
+function updateImgList(markup) {
   gallery.insertAdjacentHTML('beforeend', markup);
-  loadMoreBtn.show();
+  loadMoreBtn.classList.remove('hidden');
+
+  smoothyScroll();
+  lightbox.refresh();
 }
 
-function cleanPhotoList() {
+function cleanImgList() {
   gallery.innerHTML = '';
-  loadMoreBtn.hide();
+  loadMoreBtn.classList.add('hidden');
 }
 
-function fetchPhotoList() {
-  console.log(photoApi);
+function smoothyScroll() {
+  const { height: cardHeight } =
+    gallery.firstElementChild.getBoundingClientRect();
 
-  return photoApi
-    .fetchPhoto()
-    .then(({ hits }) => {
-      console.log(hits);
-      return hits.reduce((markup, photo) => createMarkup(photo) + markup, '');
-    })
-    .then(updatePhotoList);
-
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
 }
-
-
-function onError(error) {
-  if (error.message === 'empty request') {
-    console.log('empty request');
-  } else if (error.message === 'nothing found') {
-    console.log(
-      'Sorry, there are no images matching your search query. Please try again'
-    );
-  }
-}
-

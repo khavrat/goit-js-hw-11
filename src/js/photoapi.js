@@ -1,9 +1,12 @@
 import axios from 'axios';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
+
+const loadMoreBtn = document.querySelector('.load-more');
 
 const URL = 'https://pixabay.com/api/';
 const API_KEY = '33239789-edeb40e5557373312058accfd';
 
-class PhotoApi {
+class ImgApi {
   constructor() {
     this.queryPage = 1;
     this.perPage = '40';
@@ -12,13 +15,15 @@ class PhotoApi {
     this.hits = [];
   }
 
-  async fetchPhoto() {
+  async fetchImg() {
     const { data } = await axios
       .get(
         `${URL}?key=${API_KEY}&q=${this.queryValue}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${this.perPage}&page=${this.queryPage}`
       )
 
       .then(res => {
+        loadMoreBtn.classList.remove('is-hidden');
+
         this.hits = res.data.hits;
         this.totalHits = res.data.totalHits;
 
@@ -26,11 +31,10 @@ class PhotoApi {
         this.getNotification();
 
         this.queryPage += 1;
-        console.log(res);
+
         return res;
       });
 
-    console.log(data);
     return data;
   }
 
@@ -40,10 +44,11 @@ class PhotoApi {
 
   getNotification() {
     if (this.queryPage === 1) {
-      console.log(`Hooray! We found ${this.totalHits} images`);
+      Notify.info(`Hooray! We found ${this.totalHits} images`);
     }
     if (this.hits.length < this.perPage) {
-      console.log(`We're sorry, but you've reached the end of search results`);
+      loadMoreBtn.classList.add('is-hidden');
+      Notify.info(`We're sorry, but you've reached the end of search results`);
     }
   }
 
@@ -57,4 +62,5 @@ class PhotoApi {
   }
 }
 
-export { PhotoApi };
+export { ImgApi };
+
