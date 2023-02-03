@@ -40,18 +40,6 @@ function fetchImgList() {
     .then(updateImgList);
 }
 
-function onError(error) {
-  if (error.message === 'empty request') {
-    Notify.failure('Empty request. Enter a word to search for an image');
-    console.log(error.message);
-  } else if (error.message === 'nothing found') {
-    Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again'
-    );
-    console.log(error.message);
-  }
-}
-
 function createMarkup(hits) {
   const {
     largeImageURL,
@@ -88,6 +76,18 @@ function updateImgList(markup) {
 
   smoothyScroll();
   lightbox.refresh();
+}
+
+function onError(error) {
+  if (error.message === 'empty request') {
+    Notify.failure('Empty request. Enter a word to search for an image');
+    console.log(error.message);
+  } else if (error.message === 'nothing found') {
+    Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again'
+    );
+    console.log(error.message);
+  }
 }
 
 function cleanImgList() {

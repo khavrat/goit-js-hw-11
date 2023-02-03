@@ -102,6 +102,11 @@ button.load-more {
 display: none;
 }
 
-.load-more.is-hidden {
-display: none;
+.load-more[disabled] {
+  background-color: rgba(177, 196, 202, .3);;
+  box-shadow:
+rgba(122, 145, 158, 1) 0 3px 8px -1px;
+  color: #000000;
+  padding: 8px 16px;
+  cursor: default;
 }

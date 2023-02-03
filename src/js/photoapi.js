@@ -22,7 +22,8 @@ class ImgApi {
       )
 
       .then(res => {
-        loadMoreBtn.classList.remove('is-hidden');
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.textContent = `Load more`;
 
         this.hits = res.data.hits;
         this.totalHits = res.data.totalHits;
@@ -47,8 +48,8 @@ class ImgApi {
       Notify.info(`Hooray! We found ${this.totalHits} images`);
     }
     if (this.hits.length < this.perPage) {
-      loadMoreBtn.classList.add('is-hidden');
-      Notify.info(`We're sorry, but you've reached the end of search results`);
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.textContent = `We're sorry, but you've reached the end of search results`;
     }
   }
 
