@@ -39,6 +39,13 @@ class ImgApi {
     return data;
   }
 
+  async fetchImgDefault() {
+    const { data } = await axios.get(
+      `${URL}?key=${API_KEY}&q=ukraine&image_type=photo&orientation=horizontal&safesearch=true&per_page=${this.perPage}&page=${this.queryPage}`
+    );
+    return data;
+  }
+
   resetPage() {
     this.queryPage = 1;
   }

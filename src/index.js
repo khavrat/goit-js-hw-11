@@ -15,6 +15,15 @@ loadMoreBtn.classList.add('hidden');
 const imgApi = new ImgApi();
 const lightbox = new SimpleLightbox('.gallery-item');
 
+function fetchImgListDefault() {
+imgApi
+  .fetchImgDefault()
+  .then(({ hits }) => {
+    return hits.reduce((markup, img) => createMarkup(img) + markup, '');
+  })
+  .then(updateImgListDefault);
+}
+fetchImgListDefault();
 
 function fetchImgBySubmit(e) {
   e.preventDefault();
@@ -76,6 +85,14 @@ function updateImgList(markup) {
 
   smoothyScroll();
   lightbox.refresh();
+}
+
+function updateImgListDefault(markup) {
+    gallery.insertAdjacentHTML('beforeend', markup);
+    loadMoreBtn.classList.add('hidden');
+
+    smoothyScroll();
+    lightbox.refresh();
 }
 
 function onError(error) {
